@@ -7,9 +7,9 @@ Ready to use solution for rapid web development with LIFT framework and other fr
 Provides CRUD functionality and conventions on the whole APP structure.
 
 #Why?
-Because BLISS provides mature stack for web-application development
-Because Lift is powerful web-framework and BLISS can provide reusable components to get maximum result with minimum efforts
-Because BLISS offers simple and transparent solution for forms creation with support for validation and custom form input fields, submit prevention etc. with no boilerplate
+1. Because BLISS provides mature stack for web-application development.
+2. Because Lift is powerful web-framework and BLISS can provide reusable components to get maximum result with minimum efforts
+3. Because BLISS offers simple and transparent solution for forms creation with support for validation and custom form input fields, submit prevention etc. with no boilerplate
 
 #The purpose:
 To create easy-to-use LIFT-based web-framework, with infrastructure for fast setup and run complex web-applications.
