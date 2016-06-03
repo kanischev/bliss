@@ -1,4 +1,4 @@
-package ru.softband.util.squeryl.mysql
+package org.libss.logic.squeryl.mysql
 
 import org.squeryl.dsl._
 import java.util.Date

@@ -1,6 +1,6 @@
-package ru.softband.util.security
+package org.libss.logic.security
 
-import ru.softband.util.helpers.PasswordHasher
+import org.libss.util.helpers.PasswordHasher
 
 /**
   * date: 03.06.2016 00:05
@@ -12,13 +12,13 @@ import ru.softband.util.helpers.PasswordHasher
 trait UserCredentialsChecker[T <: User] extends PasswordHasher {
   //TODO: Add disabled user check
   protected def checkLoginAllowed(userLogin: String): Boolean = {
-    userAccountBy(userLogin).map(checkLoginAllowed(_)).getOrElse(false)
+    userAccountBy(userLogin).exists(checkLoginAllowed(_))
   }
 
   protected def checkLoginAllowed(user: T) = user.isConfirmed
 
   def checkCredentials(login: String, password: String): Boolean = {
-    userAccountBy(login).map(checkCredentials(_, password)).getOrElse(false)
+    userAccountBy(login).exists(checkCredentials(_, password))
   }
 
   protected def checkCredentials(user: T, pwd: String): Boolean = user.getPasswordHash == generateHash(pwd, Option(user.getPasswordSalt))

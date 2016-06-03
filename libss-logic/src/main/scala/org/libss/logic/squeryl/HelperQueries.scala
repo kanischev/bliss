@@ -1,8 +1,8 @@
-package ru.softband.util.squeryl
+package org.libss.logic.squeryl
 
 import org.squeryl.dsl.TypedExpression
 import org.squeryl._
-import ru.softband.util.helpers.{OptionHelper, SafeStringOptionHelper}
+import org.libss.util.helpers.{OptionHelper, SafeStringOptionHelper}
 import CallbackSchema._
 
 /**

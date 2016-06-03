@@ -1,4 +1,4 @@
-package ru.softband.util.guice
+package org.libss.logic.guice
 
 import java.util.concurrent.atomic.AtomicReference
 

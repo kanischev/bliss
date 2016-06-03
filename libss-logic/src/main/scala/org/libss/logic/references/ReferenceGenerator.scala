@@ -1,4 +1,4 @@
-package ru.softband.util.references
+package org.libss.logic.references
 
 /**
   * date: 02.06.2016 23:47

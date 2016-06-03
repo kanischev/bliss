@@ -1,7 +1,7 @@
-package ru.softband.util
+package org.libss.util
 
 import org.scalatest.{FlatSpec, Matchers}
-import ru.softband.util.helpers.PasswordHasher
+import org.libss.util.helpers.PasswordHasher
 
 /**
  * date: 10.04.2014 21:52

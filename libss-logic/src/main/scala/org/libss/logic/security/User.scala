@@ -1,6 +1,6 @@
-package ru.softband.util.security
+package org.libss.logic.security
 
-import ru.softband.util.helpers.{Gender, PasswordHasher, PasswordGenerator}
+import org.libss.util.helpers.{Gender, PasswordHasher, PasswordGenerator}
 
 /**
   * date: 02.06.2016 23:59

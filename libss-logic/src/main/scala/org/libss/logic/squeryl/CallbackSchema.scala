@@ -1,4 +1,4 @@
-package ru.softband.util.squeryl
+package org.libss.logic.squeryl
 
 import org.squeryl.{KeyedEntityDef, Schema}
 import org.squeryl.PrimitiveTypeMode._

@@ -1,6 +1,6 @@
-package ru.softband.util.squeryl
+package org.libss.logic.squeryl
 
-import ru.softband.util.helpers.ReflectionFieldValueHandler
+import org.libss.util.helpers.ReflectionFieldValueHandler
 import java.util.UUID
 
 /**

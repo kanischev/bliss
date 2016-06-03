@@ -1,4 +1,4 @@
-package ru.softband.util.squeryl
+package org.libss.logic.squeryl
 
 import org.squeryl.internals.DatabaseAdapter
 import org.squeryl.adapters.{MySQLAdapter, MSSQLServer, OracleAdapter, H2Adapter}

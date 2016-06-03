@@ -1,4 +1,4 @@
-package ru.softband.util.liquibase
+package org.libss.logic.liquibase
 
 import javax.sql.DataSource
 import java.sql.Connection
@@ -29,7 +29,7 @@ class LiquibaseInstaller extends DataSourceUpdater {
   }
 
   def update(dsWithNames: Seq[(String, DataSource)]) {
-    dsWithNames.map{case (dbName, ds) => {
+    dsWithNames.foreach{case (dbName, ds) => {
       val fileOpener = new ClassLoaderResourceAccessor(getClass.getClassLoader)
 
       val liqui = withConnection(ds, (conn) => {

@@ -1,7 +1,7 @@
-package ru.softband.util.references
+package org.libss.logic.references
 
 import com.google.inject.{Inject, Provider}
-import ru.softband.util.helpers.OptionHelper
+import org.libss.util.helpers.OptionHelper
 import scala.collection.JavaConversions._
 
 /**
