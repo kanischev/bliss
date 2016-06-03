@@ -38,7 +38,7 @@
         </dependency>
         <dependency>
             <groupId>net.liftmodules</groupId>
-            <artifactId>imaging_2.6_2.10</artifactId>
+            <artifactId>imaging_2.6_${scalaBinaryVersion}</artifactId>
         </dependency>
         <dependency>
             <groupId>com.sun.mail</groupId>
