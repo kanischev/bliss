@@ -22,4 +22,17 @@ trait MySQLFunctions {
              from: TypedExpression[Int, TInt],
              to: TypedExpression[Int, TInt])
             (implicit fac: TypedExpressionFactory[String, TString]) = fac.convert(new FunctionNode("SUBSTR", Seq(f, from, to)))
+
+  def concat(f: TypedExpression[String, TString] *)
+            (implicit fac: TypedExpressionFactory[String, TString]) = fac.convert(new FunctionNode("CONCAT", f.toSeq))
+
+  def maximum(f: TypedExpression[Long, TLong] *)
+             (implicit fac: TypedExpressionFactory[Long, TLong]) = fac.convert(new FunctionNode("MAX", f.toSeq))
+
+  def minimum(f: TypedExpression[Long, TLong] *)
+             (implicit fac: TypedExpressionFactory[Long, TLong]) = fac.convert(new FunctionNode("MIN", f.toSeq))
+
+  def ifNull( f: TypedExpression[String, TString],
+              defaultExpr: TypedExpression[String, TString])
+            (implicit fac: TypedExpressionFactory[String, TString]) = fac.convert(new FunctionNode("IFNULL", Seq(f, defaultExpr)))
 }

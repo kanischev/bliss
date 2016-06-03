@@ -3,23 +3,22 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <name>Bliss logic basic module</name>
-    <groupId>ru.softband.bliss</groupId>
-    <artifactId>bliss-logic</artifactId>
+    <name>Libss logic basic module</name>
+    <artifactId>libss-logic</artifactId>
     <version>${parent.version}</version>
     <packaging>jar</packaging>
 
     <parent>
-        <groupId>ru.softband</groupId>
-        <artifactId>bliss</artifactId>
+        <groupId>org.libss</groupId>
+        <artifactId>libss</artifactId>
         <version>1.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <dependencies>
         <dependency>
-            <groupId>ru.softband.bliss</groupId>
-            <artifactId>bliss-utils</artifactId>
+            <groupId>org.libss</groupId>
+            <artifactId>libss-utils</artifactId>
             <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>

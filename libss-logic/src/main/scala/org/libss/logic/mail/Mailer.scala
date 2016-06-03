@@ -1,4 +1,4 @@
-package ru.softband.logic.mail
+package org.libss.logic.mail
 
 import scala.xml.NodeSeq
 
