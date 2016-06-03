@@ -129,12 +129,6 @@
                 <groupId>org.scalatra.scalate</groupId>
                 <artifactId>scalate-core_${scalaBinaryVersion}</artifactId>
                 <version>${scalate.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>ch.qos.logback</groupId>
-                        <artifactId>logback-classic</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.apache.poi</groupId>

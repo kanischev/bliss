@@ -1,7 +1,6 @@
-package ru.softband.util
+package ru.softband.util.helpers
 
 import org.scalatest.{FlatSpec, Matchers}
-import ru.softband.util.helpers.RuTransliterationHelper
 
 /**
  * date: 10.04.2014 21:54
@@ -11,7 +10,7 @@ import ru.softband.util.helpers.RuTransliterationHelper
 class TranslitTest
   extends FlatSpec
     with Matchers
-    with RuTransliterationHelper {
+    with TransliterationHelper {
   "Transliteration from russian" should "be done correctly" in {
     transliterate("Садитесь, я вам рад!") should be("Sadites\', ya vam rad!")
   }
