@@ -8,6 +8,6 @@ import scala.xml.NodeSeq
   */
 
 trait Mailer {
-    def sendRawMail(from: String, recipients: List[String], subject: String, contents: String)
-    def sendHTMLMail(from: String, recipients: List[String], subject: String, contents: NodeSeq)
+  def sendRawMail(from: String, recipients: List[String], subject: String, contents: String)
+  def sendHTMLMail(from: String, recipients: List[String], subject: String, contents: NodeSeq)
 }

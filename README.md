@@ -7,13 +7,12 @@ Ready to use solution for rapid web development with LIFT framework and other fr
 Provides CRUD functionality and conventions on the whole APP structure.
 
 #Why?
-Because Lift's CRUD mechanisms are not perfect as for me.
-I prefer to separate models from views (there should not be view-annotations in model classes)
-You can't create forms for case classes easily with support for validation and custom form input fields, submit prevention etc.
-All that boilerplate simplified by BLISS
+Because BLISS provides mature stack for web-application development
+Because Lift is powerful web-framework and BLISS can provide reusable components to get maximum result with minimum efforts
+Because BLISS offers simple and transparent solution for forms creation with support for validation and custom form input fields, submit prevention etc. with no boilerplate
 
 #The purpose:
-To create scala LIFT-based webframework, providing infrastructure for fast setup and running LIFT-based application with additional functionality that LIFT lacks out-of-the-box.
+To create easy-to-use LIFT-based web-framework, with infrastructure for fast setup and run complex web-applications.
 
 #Modules
     *bliss-utils*       - contains reusable helpers trait, classes etc.
