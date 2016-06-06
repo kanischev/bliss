@@ -9,7 +9,7 @@ import net.liftweb.util.Props
  */
 
 trait LibssArtifactsHelper extends JQueryArtifacts {
-  def jqueryVersion: String = "1.7.2"
+  def jqueryVersion: String = "1.8.3"
   def twitterBootstrapFolder: String = "bootstrap3"
 
   override def pathRewriter: PartialFunction[List[String], List[String]] = {
