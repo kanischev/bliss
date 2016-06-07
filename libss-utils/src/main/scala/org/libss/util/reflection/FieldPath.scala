@@ -1,63 +1,13 @@
 package org.libss.util.reflection
 
-import org.libss.util.helpers.{SafeStringOptionHelper, ReflectionFieldValueHandler, Color}
-import scala.collection.mutable
-import scala.reflect.ClassTag
-import java.util.Date
 import java.sql.Timestamp
+import java.util.Date
 
-/**
- * date: 10.04.14
- * author: Kaa
- */
-trait FieldPathPart {
-  def name: String
+import org.libss.util.helpers.{Color, ReflectionFieldValueHandler, SafeStringOptionHelper}
 
-  def toPath: String
-
-  def getFrom(obj: AnyRef): Option[Any]
-
-  def setTo(obj: AnyRef, value: Option[Any])
-}
-
-case class SimpleFieldPathPart(name: String) extends FieldPathPart with ReflectionFieldValueHandler {
-  def toPath = name
-
-  def getFrom(obj: AnyRef) = getFieldValue[Any](name, obj)
-
-  def setTo(obj: AnyRef, value: Option[Any]) {
-    setFieldValue(obj, name, value.orNull)
-  }
-}
+import scala.reflect.ClassTag
 
 
-case class OptionFieldPathPart(name: String) extends FieldPathPart with ReflectionFieldValueHandler {
-  def toPath = "[" + name + "]"
-
-  def getFrom(obj: AnyRef) = getFieldValue[Option[Any]](name, obj).getOrElse(None)
-
-  def setTo(obj: AnyRef, value: Option[Any]) {
-    setFieldValue(obj, name, value)
-  }
-}
-
-case class MapFieldPathPart(name: String) extends FieldPathPart {
-  def toPath = "(" + name + ")"
-
-  def getFrom(obj: AnyRef) = obj match {
-    case m: Map[String, Any] => m.get(name)
-    case m: mutable.Map[String, Any] => m.get(name)
-  }
-
-  def setTo(obj: AnyRef, value: Option[Any]) {
-    obj match {
-      case m: mutable.Map[String, Any] =>
-        m.put(name, value.orNull)
-      case m: Map[String, Any] =>
-        throw new IllegalArgumentException("Can not set value %s to %s key of immutable Map".format("", ""))
-    }
-  }
-}
 
 /**
  * Class for handling path to field
@@ -148,6 +98,7 @@ trait StringFieldPathConversionHelper extends FieldPathConversionHelper[String] 
       case c: Int => safeOptionIntToString(Option(c))
       case c: Long => safeOptionLongToString(Option(c))
       case c: Double => safeOptionDoubleToString(Option(c))
+      case bd: java.math.BigDecimal => safeOptionBigDecimalToString(Option(bd))
       case c: BigDecimal => safeOptionBigDecimalToString(Option(c))
       case b: Boolean => Some(if (b) "true" else "false")
       case _ => value.map(_.toString).flatMap(strV => if (strV == null || strV.trim.isEmpty) None else Option(strV))
