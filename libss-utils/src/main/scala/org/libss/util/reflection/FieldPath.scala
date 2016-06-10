@@ -138,7 +138,7 @@ trait DateFieldPathConversionHelper extends FieldPathConversionHelper[Date] {
 
   override def converterFrom[T](value: Option[T])(implicit ct: ClassTag[T]) = {
     value.flatMap(_ match {
-      case c if(c.isInstanceOf[Date]) => Some(new java.util.Date(c.asInstanceOf[Date].getTime))
+      case c if c.isInstanceOf[Date] => Some(new java.util.Date(c.asInstanceOf[Date].getTime))
     })
   }
 }
