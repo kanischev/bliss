@@ -46,7 +46,7 @@ trait Localizable {
 
 trait InjectedLocalizable extends Localizable with SafeInjection {
   @Inject(optional=true)
-  protected var localeProvider: LocaleProvider = _
+  var localeProvider: LocaleProvider = _
 }
 
 case class DefiniteLocalizable(bundlePath: List[String], localeProviderOpt: Option[LocaleProvider] = None) extends Localizable {
