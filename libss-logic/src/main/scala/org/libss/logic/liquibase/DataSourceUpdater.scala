@@ -19,9 +19,9 @@ trait DataSourceUpdater {
 }
 
 class LiquibaseInstaller extends DataSourceUpdater {
-  /* Override to control contexts liquibase updates executions */
+  // Override to get control on context for liquibase scripts to run
   def liquibaseContexts(dsName: String) = {
-    ""
+    Option(System.getProperty("db." + dsName + ".context")).getOrElse("")
   }
 
   def withConnection[T](ds: DataSource, fun: (Connection) => T) = {

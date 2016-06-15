@@ -6,6 +6,7 @@ import com.google.inject.multibindings.Multibinder
 import com.google.inject.{AbstractModule, Guice, Injector, Module}
 
 import scala.annotation.tailrec
+import scala.util.Try
 
 /**
   * date: 02.06.2016 23:44
@@ -44,6 +45,14 @@ trait InjectionConfigurator {
 trait Injection {
   private val injector = InjectorHolder.injectorSafeGet
   injector.injectMembers(this)
+}
+
+/**
+  * Safely not injecting members in case no injector initialized. Use carefully
+  */
+trait SafeInjection {
+  private val injector = Try(InjectorHolder.injectorSafeGet).toOption
+  injector.foreach(_.injectMembers(this))
 }
 
 /**

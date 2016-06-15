@@ -7,5 +7,5 @@ import org.slf4j.LoggerFactory
   * on 03.06.2016 at 05:20.
   */
 trait Loggable {
-  lazy val Logger = LoggerFactory.getLogger(this.getClass)
+  @transient lazy val Logger = LoggerFactory.getLogger(this.getClass)
 }

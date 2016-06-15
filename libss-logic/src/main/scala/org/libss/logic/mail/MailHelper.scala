@@ -7,7 +7,7 @@ import scala.xml.NodeSeq
   * on 03.06.2016 at 05:19.
   */
 
-trait Mailer {
+trait MailHelper {
   def sendRawMail(from: String, recipients: List[String], subject: String, contents: String)
   def sendHTMLMail(from: String, recipients: List[String], subject: String, contents: NodeSeq)
 }

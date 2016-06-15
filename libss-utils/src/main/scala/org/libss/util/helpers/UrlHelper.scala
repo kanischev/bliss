@@ -9,13 +9,13 @@ package org.libss.util.helpers
 trait UrlHelper {
   def urlByFullParams(urlParts: Seq[String], params: Map[String, List[String]] = Map.empty[String, List[String]]) = {
     urlParts.mkString("/") +
-      {if(!params.isEmpty) params.flatMap{case (k, v) => v.map(vv => k + "=" + vv)}.mkString("?", "&", "")
+      {if(params.nonEmpty) params.flatMap{case (k, v) => v.map(vv => k + "=" + vv)}.mkString("?", "&", "")
       else ""}
   }
 
   def urlBy(urlParts: Seq[String], params: Map[String, String] = Map.empty[String, String]) = {
     urlParts.mkString("/") +
-      {if(!params.isEmpty) params.map{case (k, v) => k + "=" + v}.mkString("?", "&", "")
+      {if(params.nonEmpty) params.map{case (k, v) => k + "=" + v}.mkString("?", "&", "")
       else ""}
   }
 
@@ -26,4 +26,8 @@ trait UrlHelper {
   def absUrl(parts: String*) = absUrlBy(parts.toSeq)
 
   def pathToParts(urlPath: String) = urlPath.split('/').toList
+
+  protected def prefixWithSplitterIfNeeded(path: String) =
+    if (path.startsWith("/") || path.trim.isEmpty) path else "/" + path
+
 }

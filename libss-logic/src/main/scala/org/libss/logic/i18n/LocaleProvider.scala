@@ -8,4 +8,6 @@ import java.util.Locale
   */
 trait LocaleProvider {
   def getLocale: Locale
+
+  def getDefaultLocale = Locale.ROOT
 }

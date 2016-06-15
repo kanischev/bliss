@@ -48,6 +48,7 @@
         <maven.compiler.plugin.version>3.1</maven.compiler.plugin.version>
         <logback.version>1.1.7</logback.version>
         <joda.version>2.9.4</joda.version>
+        <scribe.version>2.7.3</scribe.version>
     </properties>
 
     <dependencyManagement>
@@ -249,6 +250,11 @@
                 <groupId>joda-time</groupId>
                 <artifactId>joda-time</artifactId>
                 <version>${joda.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.scribejava</groupId>
+                <artifactId>scribejava-apis</artifactId>
+                <version>${scribe.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
