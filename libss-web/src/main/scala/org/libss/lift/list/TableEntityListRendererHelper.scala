@@ -4,6 +4,8 @@ import net.liftweb.http.js.JsCmd
 import net.liftweb.util.Helpers._
 import net.liftweb.util.{CssSel, PassThru}
 
+import scala.xml.{NodeSeq, Text}
+
  /**
   * Trait that helps in items lists table rendering
   */
@@ -47,14 +49,12 @@ trait TableEntityListRenderHelper {
                            ): CssSel
 
   def renderTableBody[E](items: Seq[E], cols: Seq[EntityValuePresenter[E]]): CssSel
-/*
 
-  def tableClassHook(apply: Boolean) = {
-    if(!apply) ".table [class+]" #> ""
-    else ".table [class+]" #> "table-hover"
-  }
-*/
-}
+  def renderTableInfo(page: Long, itemsPerPage: Long, totalItems: Long): CssSel
+
+   def renderPager(totalPageCount: Long, page: Long, referenceRenderer: (Long, Option[String]) => NodeSeq): CssSel
+
+ }
 
 /**
   * Default twitter-bootstrap styled renderer helper implementation
@@ -62,14 +62,13 @@ trait TableEntityListRenderHelper {
 object BootstrapTableEntityListRenderHelper
   extends TableEntityListRenderHelper {
   /** @inheritdoc */
-  override def renderTableHeader(cols: Seq[EntityValuePresenter[_]]): CssSel =
-    ".columnHead *" #> cols.map(_.renderLabel)
+  override def renderTableHeader(cols: Seq[EntityValuePresenter[_]]): CssSel = ".columnHead *" #> cols.map(_.renderLabel)
 
   /** @inheritdoc */
   override def isColumnClickable(column: EntityValuePresenter[_]): Boolean = !column.isInstanceOf[TableColumn[_]] || (column.isInstanceOf[TableColumn[_]] && column.asInstanceOf[TableColumn[_]].clickable)
 
   /** @inheritdoc */
-  override protected def bindToColumn[E](item: E,
+  override def bindToColumn[E](item: E,
                                       column: EntityValuePresenter[E],
                                       rowClickCmd: Option[(E) => JsCmd]) = {
     {
@@ -80,7 +79,7 @@ object BootstrapTableEntityListRenderHelper
         ".column *" #> column.renderValue(item)
     } &
       ".column [class+]" #> {column match {
-        case aligned: TableColumn => aligned.valueAlignment.toString
+        case aligned: TableColumn[_] => aligned.valueAlignment.toString
         case _ => ""
       }}
   }
@@ -98,4 +97,9 @@ object BootstrapTableEntityListRenderHelper
 
   /** @inheritdoc */
   override def renderTableBody[E](items: Seq[E], cols: Seq[EntityValuePresenter[E]]): CssSel  = ".itemRow" #> items.map(item => bindItemToTableRow(item, cols)).toList
+
+  //TODO: i18n
+  override def renderTableInfo(page: Long, itemsPerPage: Long, totalItems: Long): CssSel = ".tableInfo *" #> Text("Показаны с " + ((page-1)*itemsPerPage + 1) + " по " + (math.min(totalItems, page * itemsPerPage)) + " из " + totalItems)
+
+  override def renderPager(totalPageCount: Long, page: Long, referenceRenderer: (Long, Option[String]) => NodeSeq): CssSel = ".table-pagination *" #> NodeSeq.Empty
 }
