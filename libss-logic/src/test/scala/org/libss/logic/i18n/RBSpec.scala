@@ -9,9 +9,7 @@ import org.scalatest.{FlatSpec, Matchers}
   * on 10.06.2016 at 00:09.
   */
 case class LocalizedExample(locale: Locale) extends Localizable {
-  val localeProvider = new LocaleProvider {
-    override def getLocale: Locale = locale
-  }
+  val localeProvider = DefiniteLocaleProvider(locale)
 }
 
 class RBSpec extends FlatSpec with Matchers {

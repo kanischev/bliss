@@ -13,5 +13,6 @@ object LibssRules {
   var defaultLocaleProvider = new LiftLocaleProvider
   var defaultTableRendererHelper = BootstrapTableEntityListRenderHelper
   var defaultPaginationRenderingStrategy: PaginationRenderingStrategy = FixedLinksCount(7)
+//  var defaultNoResultsRenderer =
 
 }

@@ -19,7 +19,12 @@ import scala.xml.NodeSeq
   * Main trait for all snippets, rendering lists
   * @tparam E type of entities, that list's data contains
   */
-trait TableItemsListSnippet[E] {
+trait TableItemsListSnippet[E] extends Localizable {
+
+  def tableRendererHelper: TableEntityListRenderHelper = LibssRules.defaultTableRendererHelper
+
+  override def localeProvider: LocaleProvider = LibssRules.defaultLocaleProvider
+
   /**
     * @return Seq of columns to be rendered in list
     */
@@ -29,6 +34,26 @@ trait TableItemsListSnippet[E] {
     * @return Command to be executed on row click with item as parameter
     */
   def rowClickCmd: Option[(E) => JsCmd] = None
+
+
+  /**
+    * @inheritdoc
+    */
+  abstract override def resourceNames: List[String] = super.resourceNames :+ "i18n.org.libss.lift.list.TableItemsList"
+
+  /**
+    * Actually render method
+    *
+    * @return Rendered NodeSeq
+    */
+  def render: NodeSeq
+
+  protected def renderNoResults(columnDescriptions: Seq[EntityValuePresenter[E]]): NodeSeq = <h2>{getString("no.results.label")}</h2>
+
+  def tableClassHook(apply: Boolean) = {
+    if(!apply) ".table [class+]" #> ""
+    else ".table [class+]" #> "table-hover"
+  }
 }
 
 
@@ -69,22 +94,6 @@ trait FilteredTableItemsListSnippet[E, F] extends TableItemsListSnippet[E] {
     * @return filtering object with default field values
     */
   def defaultFilteringObject: F
-
-  /**
-    * Actually render method
-    *
-    * @return Rendered NodeSeq
-    */
-  def render: NodeSeq
-
-  def tableRendererHelper: TableEntityListRenderHelper = LibssRules.defaultTableRendererHelper
-
-  def tableClassHook(apply: Boolean) = {
-    if(!apply) ".table [class+]" #> ""
-    else ".table [class+]" #> "table-hover"
-  }
-
-  protected def renderNoResults(columnDescriptions: Seq[EntityValuePresenter[E]]): NodeSeq
 }
 
 trait FilteredPageableTableItemsListSnippet[E, F <: PageableBase]
@@ -93,24 +102,23 @@ trait FilteredPageableTableItemsListSnippet[E, F <: PageableBase]
   with RequestHelper
   with MapHelper
   with OptionHelper
-  with ComputeHelper
-  with Localizable {
+  with ComputeHelper {
 
   val PageParamName = "page"
   val ItemsPerPageParamName = "itemsPerPage"
 
-  override protected def renderNoResults(columnDescriptions: Seq[EntityValuePresenter[E]]): NodeSeq = ???
-
-  protected def wrappedWithPrefix(param: String) = prefix.map(_ + param).getOrElse(param)
+  protected def wrappedWithPrefix(param: String) = prefix.getOrElse("") + param
 
   /**
     * @inheritdoc
     */
   override def filteringDescriptor: FilteringDescriptor[F]
 
+  /**
+    * Change if you need some specific rendering strategy for current list
+    * @return Pagination rendering strategy
+    */
   def paginationRenderingStrategy: PaginationRenderingStrategy = LibssRules.defaultPaginationRenderingStrategy
-
-  def pageLinkRenderer = LibssRules.defaultPaginationRenderingStrategy
 
   def pageLinkRenderer(value: Long, label: Option[String]): NodeSeq = <a>{label.getOrElse(value.toString)}</a> % ("href" -> withReplacedOrAddedParam(wrappedWithPrefix(PageParamName), List(""+value)))
 
@@ -145,6 +153,5 @@ trait FilteredPageableTableItemsListSnippet[E, F <: PageableBase]
   }
 
   override def templateName: List[String] = LibssRules.defaultPageableTableTemplate
-  override def localeProvider: LocaleProvider = LibssRules.defaultLocaleProvider
 }
 

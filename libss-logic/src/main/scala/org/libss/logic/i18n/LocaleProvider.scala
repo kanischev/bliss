@@ -11,3 +11,7 @@ trait LocaleProvider {
 
   def getDefaultLocale = Locale.ROOT
 }
+
+case class DefiniteLocaleProvider(locale: Locale) extends LocaleProvider {
+  override def getLocale: Locale = locale
+}
