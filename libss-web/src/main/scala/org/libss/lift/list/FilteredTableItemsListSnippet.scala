@@ -19,11 +19,17 @@ import scala.xml.NodeSeq
   * Main trait for all snippets, rendering lists
   * @tparam E type of entities, that list's data contains
   */
-trait TableItemsListSnippet[E] extends Localizable {
+trait TableItemsListSnippet[E]
+  extends Localizable
+  with NamedTemplateAware {
 
   def tableRendererHelper: TableEntityListRenderHelper = LibssRules.defaultTableRendererHelper
 
   override def localeProvider: LocaleProvider = LibssRules.defaultLocaleProvider
+
+  override def templateName: List[String] = LibssRules.defaultTableTemplate
+
+  def items: Seq[E]
 
   /**
     * @return Seq of columns to be rendered in list
@@ -46,7 +52,16 @@ trait TableItemsListSnippet[E] extends Localizable {
     *
     * @return Rendered NodeSeq
     */
-  def render: NodeSeq
+  def render: NodeSeq = {
+    val genColumns = columns
+    val tableItems = items
+    if (tableItems.nonEmpty)
+      (tableRendererHelper.renderTableHeader(genColumns) &
+        tableClassHook(rowClickCmd.isDefined) &
+        tableRendererHelper.renderTableBody(items, genColumns))(template)
+    else
+      renderNoResults(genColumns)
+  }
 
   protected def renderNoResults(columnDescriptions: Seq[EntityValuePresenter[E]]): NodeSeq = <h2>{getString("no.results.label")}</h2>
 
@@ -79,7 +94,14 @@ trait FilteredTableItemsListSnippet[E, F] extends TableItemsListSnippet[E] {
     * @param filter - filtering object
     * @return should return the list of items satisfying the filter
     */
-  def rowsBy(filter: F): Seq[E]
+  def itemsBy(filter: F): Seq[E]
+
+  /**
+    * just uses {{itemsBy} with {{defaultFilteringObject}}
+    * use itemsBy(filter) instead
+    * @return
+    */
+  override def items: Seq[E] = itemsBy(defaultFilteringObjectFun())
 
   /**
     * Descriptor for handling filtering form
@@ -93,12 +115,11 @@ trait FilteredTableItemsListSnippet[E, F] extends TableItemsListSnippet[E] {
     *
     * @return filtering object with default field values
     */
-  def defaultFilteringObject: F
+  def defaultFilteringObjectFun: () => F
 }
 
 trait FilteredPageableTableItemsListSnippet[E, F <: PageableBase]
   extends FilteredTableItemsListSnippet[E, F]
-  with NamedTemplateAware
   with RequestHelper
   with MapHelper
   with OptionHelper
@@ -130,14 +151,14 @@ trait FilteredPageableTableItemsListSnippet[E, F <: PageableBase]
     val reqParamsMap = S.request.toOption.map(_.params).getOrElse(Map.empty[String, List[String]])
     val paramsMap = prefix.map(pr => reqParamsMap.filterKeys(_.startsWith(pr)).unPrefixKeys(pr)).getOrElse(reqParamsMap)
     val descr = filteringDescriptor
-    val filtObj = defaultFilteringObject
+    val filtObj = defaultFilteringObjectFun()
 
     val filterControls = descr.filteringFields
     descr.updateControlsWith(filterControls, filtObj)
     descr.updateFromMap(filterControls, paramsMap.map{case(k, v) => (k, v.head)}.toMap)
     descr.updateFilteringObjectWith(filtObj, filterControls)
 
-    val items = rowsBy(filtObj)
+    val items = itemsBy(filtObj)
     val itemsQuantity = countAllItems(filtObj)
     val totalPages = divideWithOverflow(itemsQuantity, filtObj.itemsPerPage)
     val page = math.min(filtObj.page, if (totalPages == 0) 1 else totalPages)
