@@ -2,6 +2,7 @@ package org.libss.lift.list
 
 import net.liftweb.http.S
 import net.liftweb.http.js.JsCmd
+import net.liftweb.util.CssSel
 import org.libss.lift.boot.LibssRules
 import org.libss.lift.util.{NamedTemplateAware, RequestHelper}
 import org.libss.logic.i18n.{LocaleProvider, Localizable}
@@ -14,8 +15,7 @@ import scala.xml.NodeSeq
 /**
   * Created by Kaa 
   * on 22.06.2016 at 01:48.
-  */
-/**
+  *
   * Main trait for all snippets, rendering lists
   * @tparam E type of entities, that list's data contains
   */
@@ -23,18 +23,17 @@ trait TableItemsListSnippet[E]
   extends Localizable
   with NamedTemplateAware {
 
+  //Reasonable defaults
   def tableRendererHelper: TableEntityListRenderHelper = LibssRules.defaultTableRendererHelper
-
   override def localeProvider: LocaleProvider = LibssRules.defaultLocaleProvider
-
   override def templateName: List[String] = LibssRules.defaultTableTemplate
 
-  def items: Seq[E]
+  def items: Iterable[E]
 
   /**
     * @return Seq of columns to be rendered in list
     */
-  def columns: Seq[EntityValuePresenter[E]]
+  def columns: Iterable[EntityValuePresenter[E]]
 
   /**
     * @return Command to be executed on row click with item as parameter
@@ -56,14 +55,14 @@ trait TableItemsListSnippet[E]
     val genColumns = columns
     val tableItems = items
     if (tableItems.nonEmpty)
-      (tableRendererHelper.renderTableHeader(genColumns) &
+      (tableRendererHelper.bindTableHeaderRendering(genColumns) &
         tableClassHook(rowClickCmd.isDefined) &
-        tableRendererHelper.renderTableBody(items, genColumns))(template)
+        tableRendererHelper.bindTableBodyRendering(items, genColumns))(template)
     else
       renderNoResults(genColumns)
   }
 
-  protected def renderNoResults(columnDescriptions: Seq[EntityValuePresenter[E]]): NodeSeq = <h2>{getString("no.results.label")}</h2>
+  protected def renderNoResults(columnDescriptions: Iterable[EntityValuePresenter[E]]): NodeSeq = <h2>{i18n("no.results.label")}</h2>
 
   def tableClassHook(apply: Boolean) = {
     if(!apply) ".table [class+]" #> ""
@@ -94,14 +93,15 @@ trait FilteredTableItemsListSnippet[E, F] extends TableItemsListSnippet[E] {
     * @param filter - filtering object
     * @return should return the list of items satisfying the filter
     */
-  def itemsBy(filter: F): Seq[E]
+  def itemsBy(filter: F): Iterable[E]
 
   /**
     * just uses {{itemsBy} with {{defaultFilteringObject}}
     * use itemsBy(filter) instead
+    *
     * @return
     */
-  override def items: Seq[E] = itemsBy(defaultFilteringObjectFun())
+  override def items: Iterable[E] = itemsBy(defaultFilteringObjectFun())
 
   /**
     * Descriptor for handling filtering form
@@ -128,7 +128,9 @@ trait FilteredPageableTableItemsListSnippet[E, F <: PageableBase]
   val PageParamName = "page"
   val ItemsPerPageParamName = "itemsPerPage"
 
-  protected def wrappedWithPrefix(param: String) = prefix.getOrElse("") + param
+  override def templateName: List[String] = LibssRules.defaultPageableTableTemplate
+
+  protected def wrappedWithPrefix(param: String) = s"${prefix.getOrElse("")}$param"
 
   /**
     * @inheritdoc
@@ -137,11 +139,21 @@ trait FilteredPageableTableItemsListSnippet[E, F <: PageableBase]
 
   /**
     * Change if you need some specific rendering strategy for current list
+    *
     * @return Pagination rendering strategy
     */
   def paginationRenderingStrategy: PaginationRenderingStrategy = LibssRules.defaultPaginationRenderingStrategy
 
-  def pageLinkRenderer(value: Long, label: Option[String]): NodeSeq = <a>{label.getOrElse(value.toString)}</a> % ("href" -> withReplacedOrAddedParam(wrappedWithPrefix(PageParamName), List(""+value)))
+  /**
+    * function making page link Node rendered
+    *
+    * @param value Page number
+    * @param label optional label for this page link (if empty - page number is used)
+    * @return NodeSeq presenting link to specified page
+    */
+  def pageLinkRenderer(value: Long, label: Option[String]): NodeSeq = <a>{label.getOrElse(value.toString)}</a> % ("href" -> withReplacedOrAddedParam(wrappedWithPrefix(PageParamName), List(s"$value")))
+
+  def bindTableInfoRendering(page: Long, itemsPerPage: Long, totalItemsQuantity: Long): CssSel = ".tableInfo" #> s"${i18n("table.info.shown.from.label")} ${page * itemsPerPage + 1} ${i18n("table.info.shown.till.label")} ${math.min(totalItemsQuantity, (page+1) * itemsPerPage)} ${i18n("table.info.shown.of.label")} $totalItemsQuantity"
 
   /**
     * @inheritdoc
@@ -163,16 +175,14 @@ trait FilteredPageableTableItemsListSnippet[E, F <: PageableBase]
     val totalPages = divideWithOverflow(itemsQuantity, filtObj.itemsPerPage)
     val page = math.min(filtObj.page, if (totalPages == 0) 1 else totalPages)
     if (itemsQuantity > 0)
-      (tableRendererHelper.renderTableHeader(genColumns) &
+      (tableRendererHelper.bindTableHeaderRendering(genColumns) &
         tableClassHook(rowClickCmd.isDefined) &
-        tableRendererHelper.renderTableBody(items, genColumns) &
-        tableRendererHelper.renderPager(totalPages, page, pageLinkRenderer) &
-        tableRendererHelper.renderTableInfo(page, filtObj.itemsPerPage, itemsQuantity))(template)
+        tableRendererHelper.bindTableBodyRendering(items, genColumns) &
+        paginationRenderingStrategy.bindPaginationRendering(totalPages, page, pageLinkRenderer) &
+        bindTableInfoRendering(page, filtObj.itemsPerPage, itemsQuantity))(template)
     else
       renderNoResults(genColumns)
 
   }
-
-  override def templateName: List[String] = LibssRules.defaultPageableTableTemplate
 }
 

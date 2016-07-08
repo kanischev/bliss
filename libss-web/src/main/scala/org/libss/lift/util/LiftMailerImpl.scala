@@ -5,6 +5,7 @@ import java.io.StringWriter
 import com.google.inject.Inject
 import net.liftweb.util.{Html5, Mailer}
 import net.liftweb.util.Mailer.{From, PlainPlusBodyType, Subject, To, XHTMLMailBodyType}
+import org.libss.lift.boot.LibssLocalizable
 import org.libss.logic.guice.SafeInjection
 import org.libss.logic.i18n.{InjectedLocalizable, LocaleProvider, Localizable}
 import org.libss.logic.mail.MailHelper
@@ -33,15 +34,15 @@ class LiftMailerImpl extends MailHelper {
 class LiftLogMailerImpl
   extends MailHelper
     with Loggable
-    with InjectedLocalizable {
+    with LibssLocalizable {
 
   protected val printingTemplate =
     s"""---------------------------------------------------
-       ${getString("mail.send.title.label")}
-      | ${getString("mail.send.from.label")}: %s
-      | ${getString("mail.send.to.label")}: %s
-      | ${getString("mail.send.subject.label")}: %s
-      | ${getString("mail.send.contents.label")}:
+      | ${i18n("mail.send.title.label")}
+      | ${i18n("mail.send.from.label")}: %s
+      | ${i18n("mail.send.to.label")}: %s
+      | ${i18n("mail.send.subject.label")}: %s
+      | ${i18n("mail.send.contents.label")}:
       | %s
       |===================================================
     """.stripMargin

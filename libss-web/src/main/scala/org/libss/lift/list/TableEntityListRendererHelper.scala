@@ -3,6 +3,8 @@ package org.libss.lift.list
 import net.liftweb.http.js.JsCmd
 import net.liftweb.util.Helpers._
 import net.liftweb.util.{CssSel, PassThru}
+import org.libss.lift.boot.LibssRules
+import org.libss.logic.i18n.{LocaleProvider, Localizable}
 
 import scala.xml.{NodeSeq, Text}
 
@@ -14,7 +16,7 @@ trait TableEntityListRenderHelper {
     * @param cols List of [[EntityValuePresenter]]'s
     * @return Lift CssSel for table header rendering
     */
-  def renderTableHeader(cols: Seq[EntityValuePresenter[_]]): CssSel
+  def bindTableHeaderRendering(cols: Iterable[EntityValuePresenter[_]]): CssSel
 
   /**
     * @param column - The column to get isClickable info
@@ -42,18 +44,21 @@ trait TableEntityListRenderHelper {
      * @return Css selector with body-to-render binding
      */
   def bindItemToTableRow[E](item: E,
-                            columns: Seq[EntityValuePresenter[E]],
+                            columns: Iterable[EntityValuePresenter[E]],
                             rowClickCmd: Option[(E) => JsCmd] = None,
                             item2RowId: Option[(E) => String] = None,
                             rowRenderingHook: Option[(E) => CssSel] = None
                            ): CssSel
 
-  def renderTableBody[E](items: Seq[E], cols: Seq[EntityValuePresenter[E]]): CssSel
-
-  def renderTableInfo(page: Long, itemsPerPage: Long, totalItems: Long): CssSel
-
-   def renderPager(totalPageCount: Long, page: Long, referenceRenderer: (Long, Option[String]) => NodeSeq): CssSel
-
+  /**
+     * Defines binding for render a list of items to
+     *
+     * @param items list of entities to be rendered into table
+     * @param cols column descriptions list
+     * @tparam E type of entity in list to be rendered to this table
+     * @return CssSel as binding onto yable template
+     */
+  def bindTableBodyRendering[E](items: Iterable[E], cols: Iterable[EntityValuePresenter[E]]): CssSel
  }
 
 /**
@@ -61,8 +66,9 @@ trait TableEntityListRenderHelper {
   */
 object BootstrapTableEntityListRenderHelper
   extends TableEntityListRenderHelper {
+
   /** @inheritdoc */
-  override def renderTableHeader(cols: Seq[EntityValuePresenter[_]]): CssSel = ".columnHead *" #> cols.map(_.renderLabel)
+  override def bindTableHeaderRendering(cols: Iterable[EntityValuePresenter[_]]): CssSel = ".columnHead *" #> cols.map(_.renderLabel)
 
   /** @inheritdoc */
   override def isColumnClickable(column: EntityValuePresenter[_]): Boolean = !column.isInstanceOf[TableColumn[_]] || (column.isInstanceOf[TableColumn[_]] && column.asInstanceOf[TableColumn[_]].clickable)
@@ -86,7 +92,7 @@ object BootstrapTableEntityListRenderHelper
 
   /** @inheritdoc */
   override def bindItemToTableRow[E](item: E,
-                                     columns: Seq[EntityValuePresenter[E]],
+                                     columns: Iterable[EntityValuePresenter[E]],
                                      rowClickCmd: Option[(E) => JsCmd] = None,
                                      item2RowId: Option[(E) => String] = None,
                                      rowRenderingHook: Option[(E) => CssSel] = None
@@ -96,10 +102,5 @@ object BootstrapTableEntityListRenderHelper
   }
 
   /** @inheritdoc */
-  override def renderTableBody[E](items: Seq[E], cols: Seq[EntityValuePresenter[E]]): CssSel  = ".itemRow" #> items.map(item => bindItemToTableRow(item, cols)).toList
-
-  //TODO: i18n
-  override def renderTableInfo(page: Long, itemsPerPage: Long, totalItems: Long): CssSel = ".tableInfo *" #> Text("Показаны с " + ((page-1)*itemsPerPage + 1) + " по " + (math.min(totalItems, page * itemsPerPage)) + " из " + totalItems)
-
-  override def renderPager(totalPageCount: Long, page: Long, referenceRenderer: (Long, Option[String]) => NodeSeq): CssSel = ".table-pagination *" #> NodeSeq.Empty
+  override def bindTableBodyRendering[E](items: Iterable[E], cols: Iterable[EntityValuePresenter[E]]): CssSel  = ".itemRow" #> items.map(item => bindItemToTableRow(item, cols)).toList
 }

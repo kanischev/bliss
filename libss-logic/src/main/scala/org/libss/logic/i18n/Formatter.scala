@@ -17,12 +17,12 @@ trait Formatter extends Localizable with SafeInjection {
   val bundleName = "i18n.Formatter"
   abstract override def resourceNames: List[String] = bundleName :: super.resourceNames
 
-  val intFormat = getString("format.number.int")
-  val floatFormat = getString("format.number.bigdecimal")
+  val intFormat = i18n("format.number.int")
+  val floatFormat = i18n("format.number.bigdecimal")
 
-  val DateFormat        = new SimpleDateFormat(getString("format.date"), Option(localeProvider).flatMap(lp => Option(lp.getLocale)).getOrElse(Locale.ROOT))
-  val DateTimeFormat    = new SimpleDateFormat(getString("format.date-time"), Option(localeProvider).flatMap(lp => Option(lp.getLocale)).getOrElse(Locale.ROOT))
-  val SiteMapDateFormat = new SimpleDateFormat(getString("format.date.sitemap"), Option(localeProvider).flatMap(lp => Option(lp.getLocale)).getOrElse(Locale.ROOT))
+  val DateFormat        = new SimpleDateFormat(i18n("format.date"), Option(localeProvider).flatMap(lp => Option(lp.getLocale)).getOrElse(Locale.ROOT))
+  val DateTimeFormat    = new SimpleDateFormat(i18n("format.date-time"), Option(localeProvider).flatMap(lp => Option(lp.getLocale)).getOrElse(Locale.ROOT))
+  val SiteMapDateFormat = new SimpleDateFormat(i18n("format.date.sitemap"), Option(localeProvider).flatMap(lp => Option(lp.getLocale)).getOrElse(Locale.ROOT))
 
   def formatDate(date: Date) =
     Option(date).map(DateFormat.format).getOrElse("")

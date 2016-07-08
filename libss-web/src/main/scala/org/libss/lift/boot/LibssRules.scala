@@ -2,6 +2,7 @@ package org.libss.lift.boot
 
 import org.libss.lift.list.{BootstrapTableEntityListRenderHelper, FixedLinksCount, PaginationRenderingStrategy}
 import org.libss.lift.util.LiftLocaleProvider
+import org.libss.logic.i18n.{LocaleProvider, Localizable}
 
 /**
   * Created by Kaa 
@@ -15,4 +16,8 @@ object LibssRules {
   var defaultPaginationRenderingStrategy: PaginationRenderingStrategy = FixedLinksCount(7)
 //  var defaultNoResultsRenderer =
 
+}
+
+trait LibssLocalizable extends Localizable {
+  override def localeProvider: LocaleProvider = LibssRules.defaultLocaleProvider
 }

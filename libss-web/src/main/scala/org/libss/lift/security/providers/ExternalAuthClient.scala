@@ -5,6 +5,7 @@ import net.liftweb.common.{Empty, Full}
 import net.liftweb.http._
 import net.liftweb.http.js.JsCmds.Script
 import net.liftweb.http.js.{JsCmd, JsCmds}
+import org.libss.lift.boot.LibssLocalizable
 import org.libss.lift.security.LoginErrorHolder
 import org.libss.lift.util.{JsWindowOpen, ResourcePathHelper}
 import org.libss.logic.i18n.InjectedLocalizable
@@ -67,7 +68,7 @@ trait ExternalOAuthHandler {
   }
 }
 
-trait ExternalAuthClient extends ResourcePathHelper with InjectedLocalizable {
+trait ExternalAuthClient extends ResourcePathHelper with LibssLocalizable {
   abstract override def resourceNames: List[String] = "i18n.org.libss.lift.security.auth" :: super.resourceNames
 
   def hasEmailInfo: Boolean = true
@@ -91,7 +92,7 @@ trait ExternalAuthClient extends ResourcePathHelper with InjectedLocalizable {
   def renderClickButton: Elem =
     SHtml.a(providerIcon,
       JsWindowOpen("/external_auth/"+uniqueName+"/authenticate",
-                     getString("auth.external.window.title").format(uniqueName.capitalize),
+                     i18n("auth.external.window.title").format(uniqueName.capitalize),
                      Map("width" -> "550",
                          "height" -> "450",
                          "toolbar" -> "no",

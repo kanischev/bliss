@@ -1,6 +1,9 @@
 package org.libss.lift.list
 
-import org.libss.logic.i18n.{InjectedLocalizable, Localizable}
+import net.liftweb.util.CssSel
+import org.libss.lift.boot.LibssLocalizable
+import org.libss.logic.i18n.Localizable
+import net.liftweb.util.Helpers._
 
 import scala.xml.NodeSeq
 
@@ -59,6 +62,10 @@ trait PaginationRenderingStrategy {
                        page: Long,
                        pageReferenceRenderer: (Long,  Option[String]) => NodeSeq): NodeSeq
 
+  def bindPaginationRendering(totalPageCount: Long,
+                              page: Long,
+                              pageReferenceRenderer: (Long,  Option[String]) => NodeSeq): CssSel
+
   def renderPagination(totalPageCount: Long,
                        page: Long,
                        pageReferenceRenderer: (Long,  Option[String]) => NodeSeq): NodeSeq
@@ -66,16 +73,23 @@ trait PaginationRenderingStrategy {
 
 trait AbstractPaginationRenderingStrategy
   extends PaginationRenderingStrategy
-  with InjectedLocalizable {
+  with LibssLocalizable {
+
+  /**
+    * @inheritdoc
+    */
+  override def bindPaginationRendering(totalPageCount: Long, page: Long, pageReferenceRenderer: (Long, Option[String]) => NodeSeq) = {
+    ".pagination" #> {
+        renderToBeginAndPrevious(totalPageCount, page, pageReferenceRenderer) ++
+        renderPagesBlock(totalPageCount, page, pageReferenceRenderer) ++
+        renderToEndAndNext(totalPageCount, page, pageReferenceRenderer)
+    }
+  }
   /**
     * @inheritdoc
     */
   override def renderPagination(totalPageCount: Long, page: Long, pageReferenceRenderer: (Long, Option[String]) => NodeSeq) = {
-    <ul class="pagination">
-      {renderToBeginAndPrevious(totalPageCount, page, pageReferenceRenderer) ++
-      renderPagesBlock(totalPageCount, page, pageReferenceRenderer) ++
-      renderToEndAndNext(totalPageCount, page, pageReferenceRenderer)}
-    </ul>
+    bindPaginationRendering(totalPageCount, page, pageReferenceRenderer)(<ul class="pagination"></ul>)
   }
 
   /**
@@ -108,14 +122,11 @@ trait AbstractPaginationRenderingStrategy
     }
   }
 
-
-  override def toBeginLabel: Option[String] = Option(getString("to.begin.page.label"))
-
-  override def toEndLabel: Option[String] = Option(getString("to.end.page.label"))
-
-  override def toNextLabel: Option[String] = Option(getString("next.page.label"))
-
-  override def toPreviousLabel: Option[String] = Option(getString("previous.page.label"))
+  // Localized labels
+  override def toBeginLabel: Option[String] = Option(i18n("to.begin.page.label"))
+  override def toEndLabel: Option[String] = Option(i18n("to.end.page.label"))
+  override def toNextLabel: Option[String] = Option(i18n("next.page.label"))
+  override def toPreviousLabel: Option[String] = Option(i18n("previous.page.label"))
 }
 
 case class FixedPrePostPagesCount( renderAdditionalCount: Int = 5,
@@ -131,8 +142,7 @@ case class FixedPrePostPagesCount( renderAdditionalCount: Int = 5,
 
 case class FixedLinksCount(pagesToRender: Int = 5,
                            alwaysRenderBeginEnd: Boolean = true,
-                           labelResources: List[String] = Nil,
-                           renderGoToPage: Boolean = false
+                           labelResources: List[String] = Nil
                           ) extends AbstractPaginationRenderingStrategy with Localizable {
 
 
@@ -155,14 +165,4 @@ case class FixedLinksCount(pagesToRender: Int = 5,
       else ns ++ <li>{pageReferenceRenderer(v, None)}</li>
     )
   }
-
-  override def renderPagination(totalPageCount: Long, page: Long, pageReferenceRenderer: (Long, Option[String]) => NodeSeq) =
-    <ul class="pagination">{
-      renderToBeginAndPrevious(totalPageCount, page, pageReferenceRenderer) ++
-        renderPagesBlock(totalPageCount, page, pageReferenceRenderer) ++
-        renderToEndAndNext(totalPageCount, page, pageReferenceRenderer) ++
-        {if (renderGoToPage) <li><input type="text" class="form-control" style="display:inline" placeholder={getString("page.input.placeholder")}></input></li> else NodeSeq.Empty}
-      }
-    </ul>
-
 }

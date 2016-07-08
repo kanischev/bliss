@@ -1,9 +1,10 @@
 package org.libss.logic.i18n
 
-import java.util.{ListResourceBundle, ResourceBundle}
+import java.util.concurrent.ConcurrentHashMap
+import java.util.{ListResourceBundle, Locale, ResourceBundle}
 
 import com.google.inject.Inject
-import org.libss.logic.guice.{Injection, SafeInjection}
+import org.libss.logic.guice.SafeInjection
 
 import scala.collection.JavaConversions._
 import scala.util.Try
@@ -30,18 +31,28 @@ trait Localizable {
     override def getContents: Array[Array[AnyRef]] = Array[Array[AnyRef]]()
   }
 
-  lazy val rb = Option(localeProvider).flatMap(lp => Option(lp.getLocale))
-    .map(locale =>
-      resourceNames.find(rn => Try(ResourceBundle.getBundle(rn, locale)).isSuccess).map(rn => ResourceBundle.getBundle(rn, locale))
-    ).getOrElse(
-      resourceNames.find(rn => Try(ResourceBundle.getBundle(rn)).isSuccess).map(rn => ResourceBundle.getBundle(rn))
-    ).foldLeft(Map.empty[String, String])((m, rb) => m ++ rb.keySet().map(key => key -> rb.getString(key)).toMap)
+  val rbCache = new ConcurrentHashMap[String, ConcurrentHashMap[String, String]]()
+
+  def rb = {
+    val currentLocale = Option(localeProvider).flatMap(lp => Option(lp.getLocale)).getOrElse(Locale.ROOT)
+    val cachedRB = Option(rbCache.get(currentLocale.toString))
+    cachedRB.getOrElse({
+      val m = new ConcurrentHashMap[String, String]()
+      resourceNames.foreach(rn => {
+        Try(ResourceBundle.getBundle(rn, currentLocale)).foreach(bundle =>
+          bundle.keySet().foreach(key => m.put(key, bundle.getString(key)))
+        )
+      })
+      rbCache.put(currentLocale.toString, m)
+      m
+    })
+  }
 
   /**
-    * @param property
+    * @param property the property to get from localization resources
     * @return Localized message or provided key if message could not be find
     */
-  def getString(property: String) = rb.getOrElse(property, property)
+  def i18n(property: String) = rb.getOrElse(property, property)
 }
 
 trait InjectedLocalizable extends Localizable with SafeInjection {
