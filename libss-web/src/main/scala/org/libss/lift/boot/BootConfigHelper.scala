@@ -19,6 +19,9 @@ import org.libss.logic.squeryl.SquerylHelper
 import org.libss.util.Loggable
 import org.squeryl.{PrimitiveTypeMode, SessionFactory}
 
+import scala.compat.Platform._
+import scala.util.control.NonFatal
+
 /**
   * Created by Kaa 
   * on 09.06.2016 at 00:12.
@@ -28,6 +31,9 @@ trait BootConfigHelper
   with SquerylHelper
   with PrimitiveTypeMode
   with Loggable {
+
+  lazy val LOCALE_COOKIE_NAME = "client.locale"
+  lazy val localizationEnabled = true
 
   @Inject(optional = true)
   protected var dsUpdater: DataSourceUpdater = _
@@ -64,6 +70,7 @@ trait BootConfigHelper
   def squerylWrapperSetup() {
     S.addAround(new LoanWrapper {
       override def apply[T](f: => T): T = {
+        if (localizationEnabled && !LibssLocaleVar.set_?) LibssLocaleVar.set(Full(S.locale))
         val resultOrExcept = inTransaction {
           try {
             Right(f)
@@ -112,7 +119,7 @@ trait BootConfigHelper
 
     LiftRules.addToPackages("org.libss.lift.components")
 
-    setupLocalization()
+    if (localizationEnabled) setupLocalization()
     setupSqueryl()
     setupResourceServer()
     setupLogout()
@@ -122,12 +129,11 @@ trait BootConfigHelper
   }
 
   protected def showException(le: Throwable): String = {
-    val ret = "Message: " + le.toString + "\n\t" +
-      le.getStackTrace.map(_.toString).mkString("\n\t") + "\n"
+    val ret = s"Message: ${le.toString} $EOL ${le.getStackTrace.map(_.toString).mkString(EOL)}$EOL"
 
     val also = le.getCause match {
       case null => ""
-      case sub: Throwable => "\nCaught and thrown by:\n" + showException(sub)
+      case NonFatal(sub) => s"${EOL}Caught and thrown by:$EOL${showException(sub)}"
     }
 
     ret + also
@@ -136,8 +142,8 @@ trait BootConfigHelper
   protected def setupExceptionHandler() {
     LiftRules.exceptionHandler.prepend {
       case (_, r, e) =>
-        Logger.error("Exception being returned to browser when processing " + r.uri.toString + ": " + showException(e))
-        if (S.request.open_!.uri.startsWith("/ajax_request")) {
+        Logger.error(s"Exception being returned to browser when processing ${r.uri.toString} : ${showException(e)}")
+        if (S.request.map(_.uri.startsWith("/ajax_request")).getOrElse(false)) {
           JavaScriptResponse(Alert(e match {
             case _ => e.toString
           }))
@@ -188,9 +194,6 @@ trait BootConfigHelper
 
   protected def defaultLocale = Locale.ROOT
 
-  var localizedSetup = false
-  val LOCALE_COOKIE_NAME = "SelectedLocale"
-
   // Properly convert a language tag to a Locale
   def computeLocale(tag : String) = tag.split(Array('-', '_')) match {
     case Array(lang) => new Locale(lang)
@@ -203,9 +206,7 @@ trait BootConfigHelper
     * Also adds filling of LibssLocaleVar SessionVar when it's empty for proper localization handling in comet snippets
     */
   protected def setupLocalization() = {
-    localizedSetup = true
-    // Define this to be whatever name you want
-
+    Locale.setDefault(defaultLocale)
     LiftRules.localeCalculator = {
       case fullReq @ Full(req) =>
         // Check against a set cookie, or the locale sent in the request
