@@ -21,10 +21,6 @@ class LibssModule extends ExtendedAbstractModule {
     bind(classOf[DataSourceUpdater]) to classOf[LiquibaseInstaller]
   }
 
-  def configureFormValidator(): Unit = {
-    bind(classOf[FormValidation]) to classOf[CustomBootstrapFormValidation]
-  }
-
   def configureMailer(): Unit = {
     if (Props.productionMode)
       bind(classOf[MailHelper]) to classOf[LiftMailerImpl] in Scopes.SINGLETON
@@ -38,7 +34,6 @@ class LibssModule extends ExtendedAbstractModule {
 
   def configure() {
     configureDBInstaller()
-    configureFormValidator()
     configureMailer()
     configureLocaleProvider()
     bind(classOf[StringToXmlParser]) to classOf[StringToXmlParserImpl] in Scopes.SINGLETON

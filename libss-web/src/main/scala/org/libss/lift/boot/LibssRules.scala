@@ -1,5 +1,6 @@
 package org.libss.lift.boot
 
+import org.libss.lift.form.CustomBootstrapFormValidation
 import org.libss.lift.list.{BootstrapTableEntityListRenderHelper, FixedLinksCount, PaginationRenderingStrategy}
 import org.libss.lift.util.LiftLocaleProvider
 import org.libss.logic.i18n.{LocaleProvider, Localizable}
@@ -12,8 +13,10 @@ object LibssRules {
   var defaultTableTemplate = "libss" :: "itemsTableTemplate" :: Nil
   var defaultPageableTableTemplate = "libss" :: "pageableItemsTableTemplate" :: Nil
   var defaultLocaleProvider = new LiftLocaleProvider
+  var defaultLanguage = "en"
   var defaultTableRendererHelper = BootstrapTableEntityListRenderHelper
   var defaultPaginationRenderingStrategy: PaginationRenderingStrategy = FixedLinksCount(7)
+  var defaultFormValidator = new CustomBootstrapFormValidation
 //  var defaultNoResultsRenderer =
 
 }

@@ -120,6 +120,7 @@ trait BootConfigHelper
     LiftRules.addToPackages("org.libss.lift.components")
 
     if (localizationEnabled) setupLocalization()
+    else setupLocaleNoLocalization()
     setupSqueryl()
     setupResourceServer()
     setupLogout()
@@ -207,6 +208,7 @@ trait BootConfigHelper
     */
   protected def setupLocalization() = {
     Locale.setDefault(defaultLocale)
+    LiftRules.resourceNames = LiftRules.resourceNames ++ localeResources
     LiftRules.localeCalculator = {
       case fullReq @ Full(req) =>
         // Check against a set cookie, or the locale sent in the request
@@ -228,6 +230,23 @@ trait BootConfigHelper
       case _ => defaultLocale
     }
   }
+
+  /**
+    * Setting up locale to defaultLocale always and ResourceBundles to get proper error messages
+    */
+  protected def setupLocaleNoLocalization() = {
+    Locale.setDefault(defaultLocale)
+    LiftRules.resourceNames = LiftRules.resourceNames ++ localeResources
+    LiftRules.localeCalculator = {
+      case _ => defaultLocale
+    }
+  }
+
+  def localeResources: List[String] = List(
+    "i18n.org.libss.lift.form.validation",
+    "i18n.org.libss.lift.util.LogMailerImpl",
+    "i18n.org.libss.lift.security.auth"
+  )
 
   protected def configureSessionsMonitoring() {
 /*

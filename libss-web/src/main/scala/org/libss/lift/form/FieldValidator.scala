@@ -1,5 +1,6 @@
 package org.libss.lift.form
 
+import net.liftweb.http.S
 import org.libss.util.helpers.{OptionHelper, SafeStringOptionHelper}
 
 /**
@@ -31,56 +32,53 @@ trait FieldSuccessChecker[T] extends FieldValueAnalyzer[T] {
 }
 
 class NonEmptyValidator[T] extends FieldValidator[T] {
-  val ErrorMessage = "Поле обязательно для заполнения"
+  val ErrorMessage = S ? "validation.nonempty.error"
 
   def validate(value: Option[T]) = if (value.isDefined) None else {
     Some(ErrorMessage)
   }
 }
 
-object NonEmptyStringValidator extends NonEmptyValidator[String] {
-  val StringOfSpacesErrorMessage = "Поле должно содержать не только пробелы и символы конца строки"
-
+case class NonEmptyStringValidator(errorMessage: String = S ? "validation.nonemptystring.error") extends NonEmptyValidator[String] {
   override def validate(value: Option[String]) = {
     val s = super.validate(value)
     if (s.isDefined) s
     else
     if (value.get.trim().isEmpty)
-      Some(StringOfSpacesErrorMessage)
+      Some(errorMessage)
     else
       None
   }
 }
 
 case class RegExpValidator[T](regex: String,
-                              error: String,
+                              errorMessage: String,
                               caster: T => String = {(t:T) => t.toString}) extends FieldValidator[T] {
   def validate(value: Option[T]) = {
-    value.flatMap(v => if (caster(v).matches(regex)) None else Some(error))
+    value.flatMap(v => if (caster(v).matches(regex)) None else Some(errorMessage))
   }
 }
 
-object EmailValidator extends FieldValidator[String] {
-  val regexpValidator = RegExpValidator[String]("^[_A-Za-z0-9-]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*(\\.[A-Za-z]{2,})$", "Указан некорректный адрес электронной почты")
+case class EmailValidator(errorMessage: String = S ? "validation.email.error") extends FieldValidator[String] {
+  val regexpValidator = RegExpValidator[String]("^[_A-Za-z0-9-]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*(\\.[A-Za-z]{2,})$", errorMessage)
 
   def validate(value: Option[String]) = regexpValidator.validate(value)
 }
 
-case class IntRangeValidator(fromInclusive: Int, tillInclusive: Int)
+case class IntRangeValidator(fromInclusive: Int, tillInclusive: Int, errorMessage: String = S ? "validation.outofrange.error")
   extends FieldValidator[String]
     with SafeStringOptionHelper {
-  lazy val NotInRangeMsg = "Значение этого поля должно находиться в промежутке от %d до %d включительно".format(fromInclusive, tillInclusive)
 
   def validate(value: Option[String]) = {
     val iv = value.flatMap(toIntOpt(_))
     if (iv.exists(v => v < fromInclusive || v > tillInclusive))
-      Some(NotInRangeMsg)
+      Some(errorMessage.format(fromInclusive, tillInclusive))
     else
       None
   }
 }
 
-case class NumNotEqualsValidator(notAllowedNumericValues: Seq[Double])
+case class NumNotEqualsValidator(notAllowedNumericValues: Seq[Double], errorMessage: String = S ? "validation.notequal.error")
   extends FieldValidator[String]
     with OptionHelper
     with SafeStringOptionHelper {
@@ -96,16 +94,14 @@ case class NumNotEqualsValidator(notAllowedNumericValues: Seq[Double])
 }
 
 
-case class EqualFieldValuesValidator[T](field1: Field[_, T], field2: Field[_, T], requiredFields: Boolean = true) {
-  def message = "Значения не совпадают"
-
+case class EqualFieldValuesValidator[T](field1: Field[_, T], field2: Field[_, T], errorMessage: (Option[T], Option[T]) => String = (a: Option[T], b: Option[T]) => S ? "validation.twofields.equality.error", requiredFields: Boolean = true) {
   private def validateField(f: Field[_, T], value: Option[T]) = {
     if (requiredFields) {
       if (f.value.isEmpty || f.value.exists(f1v => value.contains(f1v))) None
-      else Some(message)
+      else Some(errorMessage.apply(f.value, value))
     } else {
       if (f.value.exists(f1v => value.contains(f1v))) None
-      else Some(message)
+      else Some(errorMessage.apply(f.value, value))
     }
   }
 
@@ -122,13 +118,13 @@ case class EqualFieldValuesValidator[T](field1: Field[_, T], field2: Field[_, T]
   }
 }
 
-case class StringLengthValidator(min: Option[Int], max: Option[Int]) extends FieldValidator[String] {
-  def messageToShort = "Значение поля должно быть длиной не менее %d символов!".format(min.get)
-  def messageToLong = "Значение поля должно быть длиной не более %d символов!".format(max.get)
+case class StringLengthValidator(min: Option[Int], max: Option[Int], tooShortMessage: String = S ? "validation.valuelength.tooshort.error", tooLongMessage: String = S ? "validation.valuelength.toolong.error") extends FieldValidator[String] {
+  def messageTooShort = tooShortMessage.format(min.get)
+  def messageTooLong = tooLongMessage.format(max.get)
 
   override def validate(value: Option[String]) = {
-    if (min.isDefined && value.exists(_.trim.length < min.get)) Some(messageToShort)
-    else if (max.isDefined && value.exists(_.trim.length > min.get)) Some(messageToLong)
+    if (min.isDefined && value.exists(_.trim.length < min.get)) Some(messageTooShort)
+    else if (max.isDefined && value.exists(_.trim.length > min.get)) Some(messageTooLong)
     else None
   }
 }

@@ -1,12 +1,12 @@
 package org.libss.lift.form
 
-import net.liftweb.http.{S, SHtml}
 import net.liftweb.http.js.JE.{JsFunc, JsNot, JsVar, Str}
-import net.liftweb.http.js.JsCmds.{Alert, JsCrVar, JsIf}
+import net.liftweb.http.js.JsCmds.{Alert, JsCrVar, JsIf, _}
 import net.liftweb.http.js.jquery.JqJE.{Jq, JqId}
 import net.liftweb.http.js.{JsCmd, JsCmds}
-import org.libss.lift.util.ResourcePathHelper
-import JsCmds._
+import net.liftweb.http.{S, SHtml}
+import org.libss.lift.boot.LibssRules
+import org.libss.lift.util.{HeadComponents, HeadComponentsLoadable, ResourcePathHelper}
 
 import scala.xml.NodeSeq
 
@@ -16,9 +16,7 @@ import scala.xml.NodeSeq
   *
   * Main trait to be provided via context with all the API needed to properly validate form fields
   */
-trait FormValidation {
-  def headAddition: NodeSeq
-
+trait FormValidation extends HeadComponentsLoadable {
   def showValidationError(fieldId: String, errorMessage: String): JsCmd
 
   def hideValidationError(fieldId: String): JsCmd
@@ -27,7 +25,7 @@ trait FormValidation {
 
   def hideFormValidationError(errorMessage: String): JsCmd
 
-  def initFormValidation(formId: String): JsCmd
+  def initFormValidation(formId: String): Option[() => JsCmd]
 
   def onErrorsCmd(errors: Seq[FieldError]): Option[JsCmd]
 }
@@ -36,14 +34,16 @@ trait FormValidation {
 case class FieldError(fieldId: String, errorMessage: String, onError: () => JsCmd = () => JsCmds.Noop)
 
 
-class FormValidationEngine extends FormValidation with ResourcePathHelper {
-  override def headAddition: NodeSeq = {
-    <script src={inClassPath("/js/jquery/jquery.validationEngine-ru.js")} type="text/javascript" charset="utf-8">
-    </script> ++
-      <script src={inClassPath("/js/jquery/jquery.validationEngine.js")} type="text/javascript" charset="utf-8">
-      </script> ++
-        <link rel="stylesheet" href={inClassPath("/css/validation/validationEngine.jquery.css")} type="text/css"/>
-  }
+class FormValidationEngine
+  extends FormValidation
+    with ResourcePathHelper
+    with HeadComponentsLoadable {
+
+
+  /**
+    * @return the map of key of pack of libraries to list of library resources to be loaded
+    */
+  override def headComponents: Map[String, List[String]] = HeadComponents.validationEngine(Option(S.locale).flatMap(l => Option(l.getLanguage)).getOrElse(LibssRules.defaultLanguage))
 
   def showValidationError(fieldId: String, errorMessage: String): JsCmd =
     JqId(fieldId) ~> JsFunc("validationEngine", "showPrompt", S ? errorMessage, "error", "topRight", true)
@@ -51,7 +51,7 @@ class FormValidationEngine extends FormValidation with ResourcePathHelper {
   def hideValidationError(fieldId: String): JsCmd =
     JqId(fieldId) ~> JsFunc("validationEngine", "hide")
 
-  def initFormValidation(formId: String): JsCmd = Jq("form") ~> JsFunc("validationEngine")
+  def initFormValidation(formId: String): Option[() => JsCmd] = Some(() => Jq("form") ~> JsFunc("validationEngine"))
 
   def onErrorsCmd(errors: scala.Seq[FieldError]): Option[JsCmd] =
     errors.map {
@@ -67,7 +67,11 @@ class FormValidationEngine extends FormValidation with ResourcePathHelper {
 
 
 class CustomBootstrapFormValidation extends FormValidation {
-  override def headAddition: NodeSeq = NodeSeq.Empty
+
+  /**
+    * @return the map of key of pack of libraries to list of library resources to be loaded
+    */
+  override def headComponents: Map[String, List[String]] = Map.empty
 
   def showValidationError(fieldId: String, errorMessage: String): JsCmd =
     JsCrVar("formGroup", JqId(fieldId) ~> JsFunc("parents", "div.form-group")) &
@@ -88,7 +92,7 @@ class CustomBootstrapFormValidation extends FormValidation {
         )
     })._2.cmd
 
-  def initFormValidation(formId: String): JsCmd = JsCmds.Noop
+  def initFormValidation(formId: String) = None
 
   def onErrorsCmd(errors: scala.Seq[FieldError]): Option[JsCmd] =
     errors.map {
@@ -97,7 +101,6 @@ class CustomBootstrapFormValidation extends FormValidation {
     }.reduceLeftOption(_ & _)
 
   def hideFormValidationError(errorMessage: String): JsCmd = JsCmds.Noop
-
 
   def showFormValidationError(errorMessage: String): JsCmd = Alert(errorMessage)
 }
