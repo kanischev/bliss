@@ -1,4 +1,6 @@
-package org.libss.lift.form
+package org.libss.lift.form.fields
+
+import net.liftweb.http.js.{JsCmd, JsExp}
 
 /**
   * Created by Kaa 
@@ -6,6 +8,7 @@ package org.libss.lift.form
   */
 trait FieldValueAnalyzer[T] {
   def analyze(value: Option[T]): Option[FieldValueMessage]
+  def clientSideAnalyze: Option[(JsExp) => JsCmd] = None
   def priority: Int
 }
 

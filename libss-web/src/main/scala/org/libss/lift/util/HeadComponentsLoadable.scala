@@ -18,10 +18,10 @@ trait HeadComponentsLoadable {
   def afterComponentsLoaded: Option[() => JsCmd] = None
 }
 
-object HeadComponents {
+object HeadComponents extends ResourcePathHelper {
   def validationEngine(language: String) = Map("validation-engine" -> List(
     "/js/jquery/jquery.validationEngine.js",
     s"/js/jquery/jquery.validationEngine-$language.js",
     "/css/validation/validationEngine.jquery.css"
-  ))
+  ).map(inClassPath))
 }

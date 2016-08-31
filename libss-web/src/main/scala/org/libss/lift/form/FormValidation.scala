@@ -6,7 +6,7 @@ import net.liftweb.http.js.jquery.JqJE.{Jq, JqId}
 import net.liftweb.http.js.{JsCmd, JsCmds}
 import net.liftweb.http.{S, SHtml}
 import org.libss.lift.boot.LibssRules
-import org.libss.lift.util.{HeadComponents, HeadComponentsLoadable, ResourcePathHelper}
+import org.libss.lift.util.{HeadComponents, HeadComponentsLoadable, ResourcePathHelper, SystemJSHelper}
 
 import scala.xml.NodeSeq
 
@@ -37,8 +37,8 @@ case class FieldError(fieldId: String, errorMessage: String, onError: () => JsCm
 class FormValidationEngine
   extends FormValidation
     with ResourcePathHelper
-    with HeadComponentsLoadable {
-
+    with HeadComponentsLoadable
+    with SystemJSHelper {
 
   /**
     * @return the map of key of pack of libraries to list of library resources to be loaded
@@ -51,7 +51,7 @@ class FormValidationEngine
   def hideValidationError(fieldId: String): JsCmd =
     JqId(fieldId) ~> JsFunc("validationEngine", "hide")
 
-  def initFormValidation(formId: String): Option[() => JsCmd] = Some(() => Jq("form") ~> JsFunc("validationEngine"))
+  def initFormValidation(formId: String): Option[() => JsCmd] = Some(() => loadAndCall(headComponents, Jq("form") ~> JsFunc("validationEngine")))
 
   def onErrorsCmd(errors: scala.Seq[FieldError]): Option[JsCmd] =
     errors.map {
@@ -60,7 +60,6 @@ class FormValidationEngine
     }.reduceLeftOption(_ & _)
 
   def hideFormValidationError(errorMessage: String): JsCmd = JsCmds.Noop
-
 
   def showFormValidationError(errorMessage: String): JsCmd = Alert(errorMessage)
 }

@@ -87,3 +87,25 @@ case class OnPageModalDialog(elementId: String, css: Option[JsObj] = None) exten
     css.map(",  css: " + _.toJsCmd + " ").getOrElse("") + "});"
 }
 
+/*
+Promise.all(
+        ['module1', 'module2', 'module3']
+        .map(x => System.import(x)))
+    .then(([module1, module2, module3]) => {
+        // Use module1, module2, module3
+    }); */
+trait SystemJSHelper extends JsExtensions {
+  def loadAndCall(modules: Seq[String], cmd: JsCmd): JsCmd = {
+    if (modules.isEmpty) cmd
+    else {
+      (JsVar("Promise") ~> JsFunc("all", JsArray(modules.map(Str(_)): _*) ~>
+        JsFunc("map", JsRaw("x => System.import(x)"))) ~>
+          JsFunc("then", AnonFunc(cmd))).cmd
+    }
+  }
+
+  def loadAndCall(modulesMap: Map[String, Seq[String]], cmd: JsCmd): JsCmd = {
+    loadAndCall(modulesMap.values.flatten.toList.distinct, cmd)
+  }
+
+}

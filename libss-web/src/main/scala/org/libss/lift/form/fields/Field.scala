@@ -1,8 +1,14 @@
-package org.libss.lift.form
+package org.libss.lift.form.fields
 
+import net.liftweb.http.js.JsCmd
+import net.liftweb.util.Helpers
+import org.libss.lift.boot.LibssRules
 import org.libss.lift.list.EntityValuePresenter
+import org.libss.lift.util.HeadComponentsLoadable
+//import org.libss.logic.i18n.Formatter
 
 import scala.collection.mutable.ListBuffer
+import scala.xml.NodeSeq
 
 /**
   * Created by Kaa 
@@ -100,5 +106,33 @@ trait Field[E, T] extends EntityValueHandler[E, T] with EntityValuePresenter[E] 
     *
     * @return NodeSeq for field value rendering
     */
-//  def renderValue = (e) => getter(e).map(v => Formatter.formatWith(v, valueFormatter)).getOrElse(NodeSeq.Empty)
+//  def renderValue = (e) => getter(e).map(v => Formatter.formatToHtmlWith(v)).getOrElse(NodeSeq.Empty)
+}
+
+trait FormField[E, T] extends Field[E, T] with HeadComponentsLoadable {
+  /**
+    * will be updated with form id
+    */
+  var formFieldId = Helpers.nextFuncName
+  lazy val formValidator = LibssRules.defaultFormValidator
+
+  def valueAnalyzers: Seq[_ <: FieldValueAnalyzer[T]]
+  def helpNS(entity: E): Option[NodeSeq]
+  def beforeSubmitCmd: JsCmd
+
+  def nonAjaxControl(entity: E): NodeSeq
+  def ajaxControl(entity: E)(implicit mkRefreshFormCmd: () => JsCmd): NodeSeq
+
+  def disabled: Boolean
+  def required: Boolean
+  def refreshFormOnChange: Boolean
+
+
+  /* Form fields lifecycle events. Should be called by Form snippet */
+  def init(): Unit
+  def destroy(): Unit
+
+  /* Client side form field initialization*/
+  def initClient: JsCmd
+
 }

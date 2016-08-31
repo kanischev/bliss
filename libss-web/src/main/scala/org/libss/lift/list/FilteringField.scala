@@ -1,7 +1,7 @@
 package org.libss.lift.list
 
 import net.liftweb.http.js.{JsCmd, JsCmds}
-import org.libss.lift.form.EntityValueHandler
+import org.libss.lift.form.fields.EntityValueHandler
 
 /**
   * Created by Kaa 

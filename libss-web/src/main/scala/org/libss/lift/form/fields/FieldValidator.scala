@@ -1,4 +1,4 @@
-package org.libss.lift.form
+package org.libss.lift.form.fields
 
 import net.liftweb.http.S
 import org.libss.util.helpers.{OptionHelper, SafeStringOptionHelper}
